@@ -4,22 +4,18 @@
 const express = require("express");
 
 const app = express();
-// app.use("/", (req, res) => {
+app.use("/user", (req, res ,next) => {
+    console.log("This is the first middleware function");
+    next();
+    res.send("Hello from the use middleware!");
     
-//     res.send("Hello from the use middleware!");
-// });
+},
+ (req, res, next) =>{
+    console.log("This is the second middleware function");
+    res.send("Hello from the second middleware!");
+    next();     
+ });
 
-app.get("/user", (req, res) => {
-    res.send("Hello from the home!");
-});
-
-app.post("/user", (req, res) => {
-    res.send("Hello from the test!");
-});
-
-app.patch("/user", (req, res) => {
-    res.send("Hello from the patch!");
-});
 
 app.listen(3000, () => {
     console.log("Server is running on port 3000");
