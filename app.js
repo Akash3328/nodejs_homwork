@@ -3,24 +3,17 @@ const connectDB = require("./config/database.js"); // Import the database connec
 const app = express();
 
 const User = require("./models/user.js"); // Import the User model
+app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-  const user = new User ({
-    firstName: "rahul",
-    lastName: "chavada",
-    emailId: "sahul@chavada.com",
-    password: "rahul1234",
-    age: 18,
-  }); // Create a new user instance with sample data
+  const user = new User(req.body); // Create a new user instance with sample data
 
-  try{
-  await user.save();
-  res.send("user added successfully ");
-  }catch (err) {
+  try {
+    await user.save();
+    res.send("user added successfully ");
+  } catch (err) {
     res.status(400).send(err.message); // Send validation error message
-  } 
-    
-  
+  }
 });
 
 connectDB()
