@@ -5,14 +5,27 @@ const app = express();
 const User = require("./models/user.js"); // Import the User model
 app.use(express.json());
 
-app.post("/signup", async (req, res) => {
-  const user = new User(req.body); // Create a new user instance with sample data
-
+// Endpoint to create a new user
+app.get("/users", async (req, res) => {
+  const userEmail = req.body.emailId;
   try {
-    await user.save();
-    res.send("user added successfully ");
+    const users = await User.find({ emailId: userEmail });
+    if (users.length === 0) {
+      return res.status(404).send("No users found with the provided email ID");
+    } else {
+      return res.send(users);
+    }
   } catch (err) {
-    res.status(400).send(err.message); // Send validation error message
+    res.status(404).send("something want wrong", err);
+  }
+});
+// Endpoint to fetch all users
+app.get("/feed", async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.send({users});
+  } catch (err) {
+    res.status(500).send("Error fetching users", err);
   }
 });
 
