@@ -87,6 +87,7 @@ app.patch("/user", async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(userId, updateData, {
       returnDocument: "after",
+      runValidators : true, // you have manually write these for validation . not for createing data on crate new data or user
     });
     console.log(user);
     res.send("User updated successfully");
