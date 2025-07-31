@@ -84,20 +84,29 @@ app.get("/feed", async (req, res) => {
 app.patch("/user", async (req, res) => {
   const userId = req.body.id;
   const updateData = req.body; // Get the data to update from the request body
-  try {
-    const user = await User.findByIdAndUpdate(userId, updateData, {
-      returnDocument: "after",
-      runValidators : true, // you have manually write these for validation . not for createing data on crate new data or user
-    });
-    console.log(user);
-    res.send("User updated successfully");
-  } catch (err) {
-    res.status(404).send("User not found", err);
+
+  const ALLOWED_UPDATES = ["photoUrl", "about", "skills", "age", "id"]; // Define allowed fields for update
+  const isUpdateAllowed = Object.keys(updateData).every((key) =>
+    ALLOWED_UPDATES.includes(key)
+  );
+  if (!isUpdateAllowed) {
+    return res.status(400).send("Invalid update fields");
   }
+    try {
+      const user = await User.findByIdAndUpdate(userId, updateData, {
+        returnDocument: "after",
+        runValidators: true, // you have manually write these for validation . not for createing data on crate new data or user
+      });
+      console.log(user);
+      res.send("User updated successfully");
+    } catch (err) {
+      res.status(404).send("User not found", err);
+    }
+  
 });
 
 // update user by emailId using patch method
-app.patch("/user/email", async (req, res) => {
+app.patch("/users/email", async (req, res) => {
   const userEmail = req.body.emailId;
   const updateData = req.body; // Get the data to update from the request body
   try {
