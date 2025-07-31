@@ -5,7 +5,22 @@ const app = express();
 const User = require("./models/user.js"); // Import the User model
 app.use(express.json());
 
-// Endpoint to create a new user
+// add new user data throw postmen body
+const duser = require("./models/user.js"); // Import the User model
+
+app.post("/signup", async (req, res) => {
+  const duser = new User(req.body); // Create a new user instance with sample data
+
+  try{
+  await duser.save();
+  res.send("user added successfully ");
+  }catch (err) {
+    res.status(400).send(err.message); // Send validation error message
+  } 
+});
+
+
+// get user by emailId
 app.get("/users", async (req, res) => {
   const userEmail = req.body.emailId;
   try {
@@ -20,13 +35,25 @@ app.get("/users", async (req, res) => {
   }
 });
 // Endpoint to fetch all users
-app.get("/feed", async (req, res) => {
-  try {
-    const users = await User.find({});
-    res.send({users});
-  } catch (err) {
-    res.status(500).send("Error fetching users", err);
-  }
+// app.get("/feed", async (req, res) => {
+//   try {
+//     const users = await User.find({});
+//     res.send({ users });
+//   } catch (err) {
+//     res.status(500).send("Error fetching users", err);
+//   }
+// });
+
+app.get("/feed", async (req,res) => {
+     const useremail = res.body.emailId;
+    try{
+      const userone = await User.findOne({emailId : useremail});
+      res.send({userone});
+         
+    }
+    catch(err){
+      res.status(500).send("error fatching users",err);
+    }
 });
 
 connectDB()
