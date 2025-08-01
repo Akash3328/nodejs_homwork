@@ -1,45 +1,41 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 // add all apropriate validation in schema and also add default values if needed
-const userSchema = new mongoose.Schema(
-  {
-    firstName: {
-      type: String,
-      required: true,
-      minlength: 2,
-      maxlength: 50,
+const userSchema = new mongoose.Schema({
+  firstName: {
+    type: String,
+    required: true,
+    minlength: 2,
+    maxlength: 50,
 
-      trim: true,
-      validate: {
-        validator: function (v) {
-          return /^[a-zA-Z]+$/.test(v); // Only letters allowed
-        },
-        message: (props) => `${props.value} is not a valid first name!`,
-      },
+    trim: true,
+    validate(value) {
+      if (!validator.isAlpha(value, "en-US", { ignore: " " })) {
+        throw new Error("First name must contain only letters and spaces");
+      }
     },
-    lastName: {
-      type: String,
-      required: true,
-      minlength: 2,
-      maxlength: 50,
-      trim: true,
-      validate: {
-        validator: function (v) {
-          return /^[a-zA-Z]+$/.test(v); // Only letters allowed
-        },
-        message: (props) => `${props.value} is not a valid last name!`,
-      },
-    },
+  },
+  lastName: {
+    type: String,
+    required: true,
+    minlength: 2,
+    maxlength: 50,
+    trim: true,
+    validate(value) {
+      if (!validator.isAlpha(value, "en-US", { ignore: " " })) {
+        throw new Error("Last name must contain only letters and spaces");
+      }
+    }},
     emailId: {
       type: String,
       required: true,
       lowercase: true, // Convert email to lowercase
       trim: true,
       unique: true,
-      validate: {
-        validator: function (v) {
-          return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v); // Basic email validation
-        },
-        message: (props) => `${props.value} is not a valid email address!`,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Invalid email format" + value);
+        }
       },
     },
     password: {
@@ -47,12 +43,16 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
       minlength: 6,
-      validate: {
-        validator: function (v) {
-          return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$/.test(v); // At least one uppercase, one lowercase, and one digit
-        },
-        message: (props) =>
-          "Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, and one digit.",
+      validate(value) {
+        if (
+          !validator.isStrongPassword(value, {
+            minLength: 6,
+          })
+        ) {
+          throw new Error(
+            "Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, and one digit."
+          );
+        }
       },
     },
     age: {
@@ -78,11 +78,10 @@ const userSchema = new mongoose.Schema(
     },
     photoUrl: {
       type: String,
-      validate: {
-        validator: function (v) {
-          return /^https?:\/\/.+/.test(v); // Accepts any http/https URL
-        },
-        message: (props) => `${props.value} is not a valid photo URL!`,
+      validate(value) {
+        if (!validator.isURL(value)) {
+          throw new Error("Invalid photo URL: " + value);
+        }
       },
       default: function () {
         if (this.gender && this.gender.toLowerCase() === "female") {
@@ -94,6 +93,7 @@ const userSchema = new mongoose.Schema(
         }
       },
     },
+
     about: {
       type: String,
       maxlength: 500, // Limit the length of the about section
@@ -102,19 +102,11 @@ const userSchema = new mongoose.Schema(
     },
     skills: {
       type: [String], // Array of strings for skills
-      validate: {
-        validator: function (v) {
-          return v.length <= 10; // Limit to a maximum of 10 skills
-        },
-        message: "You can only add up to 10 skills.",
-      },
+
       default: [],
     },
-  },
-  {
-    timestamps: true,
-  }
-);
+ 
+},{timestaps : true});
 
 const User = mongoose.model("User", userSchema);
 
