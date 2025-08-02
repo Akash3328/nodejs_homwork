@@ -3,23 +3,58 @@ const connectDB = require("./config/database.js"); // Import the database connec
 const app = express();
 
 const User = require("./models/user.js"); // Import the User model
+const { validateSignUpData } = require("./utils/validation.js"); // Import validation function
+const bcrypt = require("bcrypt");
 app.use(express.json());
-
-// add new user data throw postmen body
-const duser = require("./models/user.js"); // Import the User model
-const e = require("express");
-
+// user signup endpoint
 app.post("/signup", async (req, res) => {
-  const duser = new User(req.body); // Create a new user instance with sample data
-
   try {
-    await duser.save();
+    // Validate the incoming data
+    validateSignUpData(req);
+
+    // encrypt password
+    const { firstName, lastName, emailId, password, age, gender } = req.body;
+    const passwordHash = await bcrypt.hash(password, 10);
+    const user = new User(
+      {
+        firstName,
+        lastName,
+        emailId,
+        password: passwordHash, // Store the hashed password
+        age,
+        gender,
+      }
+      //
+    ); // Create a new user instance with sample data
+    await user.save();
     res.send("user added successfully ");
   } catch (err) {
     res.status(400).send(err.message); // Send validation error message
   }
 });
 
+// user login endpoint
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+    // validate emailid
+    // if (validate.isvalidEmail(emailId) === false) {
+    //   return res.status(400).send("Invalid email format");
+    // }
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      return res.status(404).send("invalid email or password");
+    }
+    const ispasswordValid = await bcrypt.compare(password, user.password);
+    if (ispasswordValid) {
+      res.send("login successfull !!");
+    } else {
+      return res.status(404).send("invalid email or password");
+    }
+  } catch (err) {
+    res.status(500).send("something went wrong", err.message);
+  }
+});
 // get user by id
 
 app.get("/user", async (req, res) => {
@@ -92,17 +127,16 @@ app.patch("/user", async (req, res) => {
   if (!isUpdateAllowed) {
     return res.status(400).send("Invalid update fields");
   }
-    try {
-      const user = await User.findByIdAndUpdate(userId, updateData, {
-        returnDocument: "after",
-        runValidators: true, // you have manually write these for validation . not for createing data on crate new data or user
-      });
-      console.log(user);
-      res.send("User updated successfully");
-    } catch (err) {
-      res.status(404).send("User not found", err);
-    }
-  
+  try {
+    const user = await User.findByIdAndUpdate(userId, updateData, {
+      returnDocument: "after",
+      runValidators: true, // you have manually write these for validation . not for createing data on crate new data or user
+    });
+    console.log(user);
+    res.send("User updated successfully");
+  } catch (err) {
+    res.status(404).send("User not found", err);
+  }
 });
 
 // update user by emailId using patch method

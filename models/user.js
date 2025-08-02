@@ -1,31 +1,33 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 // add all apropriate validation in schema and also add default values if needed
-const userSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    required: true,
-    minlength: 2,
-    maxlength: 50,
+const userSchema = new mongoose.Schema(
+  {
+    firstName: {
+      type: String,
+      required: true,
+      minlength: 2,
+      maxlength: 50,
 
-    trim: true,
-    validate(value) {
-      if (!validator.isAlpha(value, "en-US", { ignore: " " })) {
-        throw new Error("First name must contain only letters and spaces");
-      }
+      trim: true,
+      validate(value) {
+        if (!validator.isAlpha(value, "en-US", { ignore: " " })) {
+          throw new Error("First name must contain only letters and spaces");
+        }
+      },
     },
-  },
-  lastName: {
-    type: String,
-    required: true,
-    minlength: 2,
-    maxlength: 50,
-    trim: true,
-    validate(value) {
-      if (!validator.isAlpha(value, "en-US", { ignore: " " })) {
-        throw new Error("Last name must contain only letters and spaces");
-      }
-    }},
+    lastName: {
+      type: String,
+      required: true,
+      minlength: 2,
+      maxlength: 50,
+      trim: true,
+      validate(value) {
+        if (!validator.isAlpha(value, "en-US", { ignore: " " })) {
+          throw new Error("Last name must contain only letters and spaces");
+        }
+      },
+    },
     emailId: {
       type: String,
       required: true,
@@ -105,8 +107,9 @@ const userSchema = new mongoose.Schema({
 
       default: [],
     },
- 
-},{timestaps : true});
+  },
+  { timestamps: true }
+);
 
 const User = mongoose.model("User", userSchema);
 
