@@ -1,59 +1,41 @@
 const express = require("express");
 const connectDB = require("./config/database.js"); // Import the database connection
 const app = express();
-
 const User = require("./models/user.js"); // Import the User model
 const { validateSignUpData } = require("./utils/validation.js"); // Import validation function
 const bcrypt = require("bcrypt");
-app.use(express.json());
-// user signup endpoint
-app.post("/signup", async (req, res) => {
-  try {
-    // Validate the incoming data
-    validateSignUpData(req);
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middleware/auth.js"); // Import authentication middleware
 
-    // encrypt password
-    const { firstName, lastName, emailId, password, age, gender } = req.body;
-    const passwordHash = await bcrypt.hash(password, 10);
-    const user = new User(
-      {
-        firstName,
-        lastName,
-        emailId,
-        password: passwordHash, // Store the hashed password
-        age,
-        gender,
-      }
-      //
-    ); // Create a new user instance with sample data
-    await user.save();
-    res.send("user added successfully ");
-  } catch (err) {
-    res.status(400).send(err.message); // Send validation error message
+app.use(express.json());
+app.use(cookieParser());
+
+// user signup endpoint
+
+
+// user login endpoint
+
+
+// user profile
+app.get("/profile", userAuth,async (req, res) => {
+  
+   const { user } = req; // Get the authenticated user from the request object
+  try {
+    res.send(req.user); // Send the authenticated user's data
+    // You can also render a profile page or return user details as needed
+
+    res.send("user profile page");
+  } catch (err) { 
+    res.status(500).send("something went wrong", err.message);
   }
 });
 
-// user login endpoint
-app.post("/login", async (req, res) => {
-  try {
-    const { emailId, password } = req.body;
-    // validate emailid
-    // if (validate.isvalidEmail(emailId) === false) {
-    //   return res.status(400).send("Invalid email format");
-    // }
-    const user = await User.findOne({ emailId: emailId });
-    if (!user) {
-      return res.status(404).send("invalid email or password");
-    }
-    const ispasswordValid = await bcrypt.compare(password, user.password);
-    if (ispasswordValid) {
-      res.send("login successfull !!");
-    } else {
-      return res.status(404).send("invalid email or password");
-    }
-  } catch (err) {
-    res.status(500).send("something went wrong", err.message);
-  }
+
+// send connection request
+app.post("/sendConnectionRequest", userAuth, async (req, res) => {
+   console.log(req.user);
+  res.send(req.user.firstName +" sent a connection request to you");
 });
 // get user by id
 
