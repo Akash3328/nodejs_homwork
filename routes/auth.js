@@ -1,7 +1,9 @@
 const express = require("express");
 const authRouter = express.Router();
-
-
+const User = require("../models/user.js");
+const { validateSignUpData } = require("../utils/validation.js");
+const bcrypt = require("bcrypt");
+const { userAuth } = require("../middleware/auth.js"); // Import authentication middleware
 
 authRouter.post("/signup", async (req, res) => {
   try {
@@ -29,7 +31,6 @@ authRouter.post("/signup", async (req, res) => {
   }
 });
 
-
 authRouter.post("/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
@@ -38,12 +39,14 @@ authRouter.post("/login", async (req, res) => {
     if (!user) {
       return res.status(404).send("invalid email ");
     }
-    const ispasswordValid = await user.validatePassword(password)
+    const ispasswordValid = await user.validatePassword(password);
     if (ispasswordValid) {
       const token = await user.getJwt(); // Generate JWT token
-      res.cookie("token", token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 days
+      res.cookie("token", token, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      }); // 7 days
       return res.send("login successfull !!");
-     
     } else {
       return res.status(401).send("invalid email or password");
     }
@@ -52,4 +55,4 @@ authRouter.post("/login", async (req, res) => {
   }
 });
 
-module.exports = authrouter;
+module.exports = authRouter;

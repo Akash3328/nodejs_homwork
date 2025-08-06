@@ -11,33 +11,13 @@ const { userAuth } = require("./middleware/auth.js"); // Import authentication m
 app.use(express.json());
 app.use(cookieParser());
 
-// user signup endpoint
+const authRouter = require("./routes/auth.js");
+const profileRouter = require("./routes/profile.js");
+const requestRouter = require("./routes/request.js");
 
-
-// user login endpoint
-
-
-// user profile
-app.get("/profile", userAuth,async (req, res) => {
-  
-   const { user } = req; // Get the authenticated user from the request object
-  try {
-    res.send(req.user); // Send the authenticated user's data
-    // You can also render a profile page or return user details as needed
-
-    res.send("user profile page");
-  } catch (err) { 
-    res.status(500).send("something went wrong", err.message);
-  }
-});
-
-
-// send connection request
-app.post("/sendConnectionRequest", userAuth, async (req, res) => {
-   console.log(req.user);
-  res.send(req.user.firstName +" sent a connection request to you");
-});
-// get user by id
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", requestRouter);
 
 app.get("/user", async (req, res) => {
   const userId = req.body.id;
